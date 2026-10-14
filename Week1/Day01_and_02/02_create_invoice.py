@@ -1,0 +1,12 @@
+from fastapi import APIRouter
+from data_store import invoices
+from models import Invoice
+
+router = APIRouter()
+
+@router.post("/invoices")
+def create_invoice(invoice: Invoice):
+    # Generate a new ID for the invoice
+    new_invoice = invoice.model_dump()
+    invoices.append(new_invoice)
+    return {"message": "Invoice created successfully", "invoice": new_invoice}
