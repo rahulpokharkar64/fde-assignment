@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Patient Encounter</title>
+    <style>
+        :root {
+            font-family: Arial, sans-serif;
+            color: #26352f;
+            background: #f3f7f5;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 24px; }
+        h1, h2 { color: #28684f; }
+        h1 { margin-top: 0; }
+        section {
+            margin: 18px 0;
+            padding: 20px;
+            border: 1px solid #d8e4dd;
+            border-radius: 10px;
+            background: #fff;
+        }
+        a, button {
+            display: inline-block;
+            padding: 10px 15px;
+            border: 0;
+            border-radius: 6px;
+            color: #fff;
+            background: #398466;
+            font: inherit;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        a:hover, button:hover { background: #28664d; }
+        button:disabled { opacity: .6; cursor: wait; }
+        form {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(140px, 1fr));
+            gap: 14px;
+            align-items: end;
+        }
+        label { display: block; margin-bottom: 6px; font-weight: 700; }
+        input, select {
+            width: 100%;
+            min-height: 40px;
+            padding: 8px;
+            border: 1px solid #bdccc3;
+            border-radius: 5px;
+            background: #fff;
+            font: inherit;
+        }
+        input[readonly] { background: #eef3f0; }
+        .search-form { grid-template-columns: repeat(5, minmax(130px, 1fr)); }
+        .full-width { grid-column: 1 / -1; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #e1e9e4;
+            text-align: left;
+            white-space: nowrap;
+        }
+        th { background: #edf5f0; }
+        td button { padding: 7px 10px; }
+        .notice { min-height: 1.4em; margin: 12px 0 0; }
+        .error { color: #a52a2a; }
+        .success { color: #246843; }
+        pre {
+            max-height: 300px;
+            overflow: auto;
+            padding: 14px;
+            border-radius: 6px;
+            background: #f0f3f1;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+        @media (max-width: 900px) {
+            .search-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            #encounter-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 520px) {
+            body { padding: 14px; }
+            .search-form, #encounter-form { grid-template-columns: 1fr; }
+            .full-width { grid-column: auto; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Update Patient Encounter</h1>
+        <p>Search for an encounter, select a result to load its current values, then save changes.</p>
+        <a href="index.html">Workspace home</a>
+    </header>
+
+    <main>
+        <section>
+            <h2>Find Encounter</h2>
+            <form id="search-form" class="search-form">
+                <div>
+                    <label for="search-encounter-id">Encounter ID</label>
+                    <input id="search-encounter-id" type="number" min="1" step="1">
+                </div>
+                <div>
+                    <label for="search-patient-nbr">Patient Number</label>
+                    <input id="search-patient-nbr" type="number" min="1" step="1">
+                </div>
+                <div>
+                    <label for="search-risk-score">Risk Score</label>
+                    <input id="search-risk-score" type="number" min="0" max="8" step="1">
+                </div>
+                <div>
+                    <label for="search-risk-level">Risk Level</label>
+                    <select id="search-risk-level">
+                        <option value="">Any risk level</option>
+                        <option value="LOW">LOW</option>
+                        <option value="MEDIUM">MEDIUM</option>
+                        <option value="HIGH">HIGH</option>
+                    </select>
+                </div>
+                <div>
+                    <button type="submit" id="search-button">Search</button>
+                </div>
+            </form>
+            <p id="search-message" class="notice" role="status"></p>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Encounter ID</th>
+                            <th>Patient Number</th>
+                            <th>Age</th>
+                            <th>Risk Score</th>
+                            <th>Risk Level</th>
+                            <th>Days in Hospital</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="search-results">
+                        <tr><td colspan="7">Search for an encounter to begin.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section>
+            <h2>Encounter Details</h2>
+            <p id="selection-message" class="notice" role="status">Select an encounter above to load its details.</p>
+            <form id="encounter-form">
+                <div>
+                    <label for="encounter-id">Encounter ID</label>
+                    <input id="encounter-id" type="number" readonly required>
+                </div>
+                <div>
+                    <label for="patient-nbr">Patient Number</label>
+                    <input id="patient-nbr" type="number" min="1" step="1" required>
+                </div>
+                <div>
+                    <label for="age">Age Group</label>
+                    <input id="age" type="text" placeholder="e.g. [70-80)">
+                </div>
+                <div>
+                    <label for="time-in-hospital">Time in Hospital (days)</label>
+                    <input id="time-in-hospital" type="number" min="0" step="1" required>
+                </div>
+                <div>
+                    <label for="number-inpatient">Inpatient Visits</label>
+                    <input id="number-inpatient" type="number" min="0" step="1" required>
+                </div>
+                <div>
+                    <label for="number-emergency">Emergency Visits</label>
+                    <input id="number-emergency" type="number" min="0" step="1" required>
+                </div>
+                <div>
+                    <label for="number-outpatient">Outpatient Visits</label>
+                    <input id="number-outpatient" type="number" min="0" step="1" required>
+                </div>
+                <div>
+                    <label for="num-medications">Number of Medications</label>
+                    <input id="num-medications" type="number" min="0" step="1" required>
+                </div>
+                <div>
+                    <label for="num-lab-procedures">Lab Procedures</label>
+                    <input id="num-lab-procedures" type="number" min="0" step="1" required>
+                </div>
+                <div>
+                    <label for="discharge-id">Discharge Disposition ID</label>
+                    <input id="discharge-id" type="number" min="0" step="1">
+                </div>
+                <div>
+                    <label for="admission-type-id">Admission Type ID</label>
+                    <input id="admission-type-id" type="number" min="0" step="1">
+                </div>
+                <div>
+                    <label for="admission-source-id">Admission Source ID</label>
+                    <input id="admission-source-id" type="number" min="0" step="1">
+                </div>
+                <div>
+                    <label for="readmitted">Readmitted</label>
+                    <select id="readmitted">
+                        <option value="">Not specified</option>
+                        <option value="NO">NO</option>
+                        <option value="&lt;30">&lt;30 days</option>
+                        <option value="&gt;30">&gt;30 days</option>
+                    </select>
+                </div>
+                <div class="full-width">
+                    <button type="submit" id="update-button" disabled>Update Encounter</button>
+                </div>
+            </form>
+        </section>
+
+        <section>
+            <h2>Update Result</h2>
+            <p id="update-status" class="notice" role="status">No update submitted.</p>
+            <pre id="response-data">The API response will appear here.</pre>
+        </section>
+    </main>
+
+    <script>
+        const API_BASE = "http://localhost:8000";
+        const searchForm = document.getElementById("search-form");
+        const encounterForm = document.getElementById("encounter-form");
+
+        function showMessage(element, message, isError = false) {
+            element.textContent = message;
+            element.className = `notice ${isError ? "error" : "success"}`;
+        }
+
+        async function readResponse(response) {
+            const text = await response.text();
+            if (!text) return null;
+            try {
+                return JSON.parse(text);
+            } catch {
+                return { detail: text };
+            }
+        }
+
+        function addCell(row, value) {
+            const cell = document.createElement("td");
+            cell.textContent = value == null || value === "" ? "—" : String(value);
+            row.appendChild(cell);
+            return cell;
+        }
+
+        function renderSearchResults(encounters) {
+            const body = document.getElementById("search-results");
+            body.replaceChildren();
+            if (!encounters.length) {
+                const row = body.insertRow();
+                const cell = row.insertCell();
+                cell.colSpan = 7;
+                cell.textContent = "No matching encounters.";
+                return;
+            }
+
+            for (const encounter of encounters) {
+                const row = body.insertRow();
+                addCell(row, encounter.encounter_id);
+                addCell(row, encounter.patient_nbr);
+                addCell(row, encounter.age);
+                addCell(row, encounter.risk_score);
+                addCell(row, encounter.risk_level);
+                addCell(row, encounter.time_in_hospital);
+                const actionCell = row.insertCell();
+                const button = document.createElement("button");
+                button.type = "button";
+                button.textContent = "Select";
+                button.addEventListener("click", () => loadEncounter(encounter));
+                actionCell.appendChild(button);
+            }
+        }
+
+        function setValue(id, value) {
+            document.getElementById(id).value = value == null ? "" : String(value);
+        }
+
+        function loadEncounter(encounter) {
+            setValue("encounter-id", encounter.encounter_id);
+            setValue("patient-nbr", encounter.patient_nbr);
+            setValue("age", encounter.age);
+            setValue("time-in-hospital", encounter.time_in_hospital);
+            setValue("number-inpatient", encounter.number_inpatient);
+            setValue("number-emergency", encounter.number_emergency);
+            setValue("number-outpatient", encounter.number_outpatient);
+            setValue("num-medications", encounter.num_medications);
+            setValue("num-lab-procedures", encounter.num_lab_procedures);
+            setValue("discharge-id", encounter.discharge_disposition_id);
+            setValue("admission-type-id", encounter.admission_type_id);
+            setValue("admission-source-id", encounter.admission_source_id);
+            setValue("readmitted", encounter.readmitted);
+            document.getElementById("update-button").disabled = false;
+            showMessage(
+                document.getElementById("selection-message"),
+                `Encounter ${encounter.encounter_id} loaded. Current risk: ${encounter.risk_score} (${encounter.risk_level}).`
+            );
+            document.getElementById("update-status").textContent = "No update submitted.";
+        }
+
+        searchForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const params = new URLSearchParams();
+            for (const [fieldId, parameter] of [
+                ["search-encounter-id", "encounter_id"],
+                ["search-patient-nbr", "patient_nbr"],
+                ["search-risk-score", "risk_score"],
+                ["search-risk-level", "risk_level"]
+            ]) {
+                const value = document.getElementById(fieldId).value.trim();
+                if (value) params.set(parameter, value);
+            }
+            const message = document.getElementById("search-message");
+            if (!params.size) {
+                showMessage(message, "Enter at least one search filter.", true);
+                return;
+            }
+
+            const button = document.getElementById("search-button");
+            button.disabled = true;
+            showMessage(message, "Searching...");
+            try {
+                const response = await fetch(`${API_BASE}/encounters/search?${params}`);
+                const result = await readResponse(response);
+                if (!response.ok) {
+                    renderSearchResults([]);
+                    showMessage(message, `Search failed (HTTP ${response.status}): ${result?.detail ?? "Request failed"}`, true);
+                    return;
+                }
+                renderSearchResults(Array.isArray(result) ? result : []);
+                showMessage(message, `${result.length} encounter(s) found. HTTP ${response.status}.`);
+            } catch (error) {
+                showMessage(message, `Unable to reach the API: ${error.message}`, true);
+            } finally {
+                button.disabled = false;
+            }
+        });
+
+        function optionalInteger(id) {
+            const value = document.getElementById(id).value.trim();
+            return value === "" ? null : Number(value);
+        }
+
+        encounterForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            if (!encounterForm.reportValidity()) return;
+
+            const encounterId = document.getElementById("encounter-id").value;
+            const payload = {
+                patient_nbr: Number(document.getElementById("patient-nbr").value),
+                age: document.getElementById("age").value.trim() || null,
+                time_in_hospital: Number(document.getElementById("time-in-hospital").value),
+                number_inpatient: Number(document.getElementById("number-inpatient").value),
+                number_emergency: Number(document.getElementById("number-emergency").value),
+                number_outpatient: Number(document.getElementById("number-outpatient").value),
+                num_medications: Number(document.getElementById("num-medications").value),
+                num_lab_procedures: Number(document.getElementById("num-lab-procedures").value),
+                discharge_disposition_id: optionalInteger("discharge-id"),
+                admission_type_id: optionalInteger("admission-type-id"),
+                admission_source_id: optionalInteger("admission-source-id"),
+                readmitted: document.getElementById("readmitted").value || null
+            };
+
+            const button = document.getElementById("update-button");
+            const status = document.getElementById("update-status");
+            const responseData = document.getElementById("response-data");
+            button.disabled = true;
+            showMessage(status, "Updating encounter...");
+            responseData.textContent = "";
+            try {
+                const response = await fetch(`${API_BASE}/encounters/${encodeURIComponent(encounterId)}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                const result = await readResponse(response);
+                responseData.textContent = JSON.stringify(result, null, 2) ?? "No response body.";
+                if (!response.ok) {
+                    showMessage(status, `Update failed. HTTP ${response.status}.`, true);
+                    return;
+                }
+                showMessage(status, `Update successful. HTTP ${response.status}. Encounter ${result.encounter_id} now has risk score ${result.risk_score} (${result.risk_level}).`);
+                loadEncounter(result);
+                showMessage(status, `Update successful. HTTP ${response.status}. Encounter ${result.encounter_id} now has risk score ${result.risk_score} (${result.risk_level}).`);
+            } catch (error) {
+                showMessage(status, `Unable to reach the API: ${error.message}`, true);
+            } finally {
+                button.disabled = false;
+            }
+        });
+
+        const encounterIdFromUrl = new URLSearchParams(window.location.search).get("encounter_id");
+        if (encounterIdFromUrl) {
+            document.getElementById("search-encounter-id").value = encounterIdFromUrl;
+            searchForm.requestSubmit();
+        }
+    </script>
+</body>
+</html>

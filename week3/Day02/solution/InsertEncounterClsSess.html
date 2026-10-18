@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Diabetes Patient Management</title>
+
+    <style>
+        body {
+            margin: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f5f7f6;
+            color: #333;
+        }
+
+        h1 {
+            color: #398466;
+        }
+
+        h2 {
+            font-size: 20px;
+            color: #398466;
+        }
+
+        section {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px 20px;
+            max-width: 750px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 9px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        input:focus, select:focus {
+            outline: 2px solid #a5d6c1;
+            border-color: #398466;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #398466;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #28664d;
+        }
+
+        button:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+
+        .result {
+            padding: 12px;
+            background-color: #f1f7f3;
+            border: 1px solid #c9dfd1;
+            border-radius: 5px;
+            overflow-wrap: anywhere;
+        }
+
+        #encounter-id {
+            font-size: 20px;
+            font-weight: bold;
+            color: #237647;
+        }
+
+        #response-data {
+            padding: 12px;
+            background-color: #f2f2f2;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                margin: 10px;
+            }
+
+            form {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Diabetes Patient Management</h1>
+        <p>Create a patient encounter and check the API response.</p>
+    </header>
+
+    <main>
+
+        <section>
+            <h2>Create Patient Encounter</h2>
+
+            <form id="encounter-form">
+
+                <div>
+                    <label for="patient-nbr">Patient Number</label>
+                    <input type="number" id="patient-nbr"
+                        value="501" min="1" required>
+                </div>
+
+                <div>
+                    <label for="age">Age Group</label>
+                    <select id="age" required>
+                        <option value="[0-10)">[0-10)</option>
+                        <option value="[10-20)">[10-20)</option>
+                        <option value="[20-30)">[20-30)</option>
+                        <option value="[30-40)">[30-40)</option>
+                        <option value="[40-50)">[40-50)</option>
+                        <option value="[50-60)">[50-60)</option>
+                        <option value="[60-70)">[60-70)</option>
+                        <option value="[70-80)" selected>[70-80)</option>
+                        <option value="[80-90)">[80-90)</option>
+                        <option value="[90-100)">[90-100)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="time-in-hospital">Time in Hospital (days)</label>
+                    <input type="number" id="time-in-hospital"
+                        value="3" min="0" required>
+                </div>
+
+                <div>
+                    <label for="number-inpatient">Inpatient Visits</label>
+                    <input type="number" id="number-inpatient"
+                        value="1" min="0" required>
+                </div>
+
+                <div>
+                    <label for="number-emergency">Emergency Visits</label>
+                    <input type="number" id="number-emergency"
+                        value="0" min="0" required>
+                </div>
+
+                <div>
+                    <label for="number-outpatient">Outpatient Visits</label>
+                    <input type="number" id="number-outpatient"
+                        value="0" min="0" required>
+                </div>
+
+                <div>
+                    <label for="num-medications">Number of Medications</label>
+                    <input type="number" id="num-medications"
+                        value="5" min="0" required>
+                </div>
+
+                <div>
+                    <label for="num-lab-procedures">Lab Procedures</label>
+                    <input type="number" id="num-lab-procedures"
+                        value="20" min="0" required>
+                </div>
+
+                <div>
+                    <label for="discharge-id">Discharge Disposition ID</label>
+                    <input type="number" id="discharge-id"
+                        value="1" min="0" required>
+                </div>
+
+                <div>
+                    <label for="admission-type-id">Admission Type ID</label>
+                    <input type="number" id="admission-type-id"
+                        value="1" min="0" required>
+                </div>
+
+                <div>
+                    <label for="admission-source-id">Admission Source ID</label>
+                    <input type="number" id="admission-source-id"
+                        value="1" min="0" required>
+                </div>
+
+                <div>
+                    <label for="readmitted">Readmitted</label>
+                    <select id="readmitted" required>
+                        <option value="NO">NO</option>
+                        <option value="<30">&lt;30 days</option>
+                        <option value=">30">&gt;30 days</option>
+                    </select>
+                </div>
+
+                <div class="full-width">
+                    <button type="submit" id="submit-button">
+                        Create Encounter
+                    </button>
+                </div>
+
+            </form>
+        </section>
+
+        <section>
+            <h2>API Result</h2>
+
+            <div class="result">
+                <p>Status: <strong id="status">Waiting for submission</strong></p>
+
+                <p>Encounter ID:</p>
+                <p id="encounter-id">Not created yet</p>
+
+                <p id="message">Submit the form to create an encounter.</p>
+
+                <p>Risk Score: <strong id="risk-score">-</strong></p>
+
+                <p>Risk Level: <strong id="risk-level">-</strong></p>
+            </div>
+
+            <h3>Complete API Response</h3>
+            <pre id="response-data">The response will appear here.</pre>
+        </section>
+
+    </main>
+
+    <script>
+        // FastAPI endpoint
+        const apiUrl = "http://localhost:8000/encounters";
+
+        // Handle form submission
+        document.getElementById("encounter-form")
+            .addEventListener("submit", async function (event) {
+
+                event.preventDefault();
+
+                const button = document.getElementById("submit-button");
+
+                // Prepare the request data
+                const encounterData = {
+                    encounter_id: Date.now(),
+                    patient_nbr: Number(
+                        document.getElementById("patient-nbr").value
+                    ),
+                    age: document.getElementById("age").value,
+                    time_in_hospital: Number(
+                        document.getElementById("time-in-hospital").value
+                    ),
+                    number_inpatient: Number(
+                        document.getElementById("number-inpatient").value
+                    ),
+                    number_emergency: Number(
+                        document.getElementById("number-emergency").value
+                    ),
+                    number_outpatient: Number(
+                        document.getElementById("number-outpatient").value
+                    ),
+                    num_medications: Number(
+                        document.getElementById("num-medications").value
+                    ),
+                    num_lab_procedures: Number(
+                        document.getElementById("num-lab-procedures").value
+                    ),
+                    discharge_disposition_id: Number(
+                        document.getElementById("discharge-id").value
+                    ),
+                    admission_type_id: Number(
+                        document.getElementById("admission-type-id").value
+                    ),
+                    admission_source_id: Number(
+                        document.getElementById("admission-source-id").value
+                    ),
+                    readmitted: document.getElementById("readmitted").value
+                };
+
+                // Reset previous results
+                document.getElementById("status").textContent = "Submitting...";
+                document.getElementById("encounter-id").textContent = "Waiting...";
+                document.getElementById("risk-score").textContent = "-";
+                document.getElementById("risk-level").textContent = "-";
+                document.getElementById("message").textContent = "";
+                document.getElementById("response-data").textContent = "";
+
+                button.disabled = true;
+
+                try {
+
+                    // Send POST request to FastAPI
+                    const response = await fetch(apiUrl, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(encounterData)
+                    });
+
+                    // Read the response safely
+                    const responseText = await response.text();
+
+                    let result;
+
+                    try {
+                        result = JSON.parse(responseText);
+                    } catch {
+                        result = { detail: responseText };
+                    }
+
+                    // Display the complete response
+                    document.getElementById("response-data").textContent =
+                        JSON.stringify(result, null, 2);
+
+                    // Handle API errors
+                    if (!response.ok) {
+
+                        document.getElementById("status").textContent =
+                            "Failed: HTTP " + response.status;
+
+                        document.getElementById("encounter-id").textContent =
+                            "Not confirmed";
+
+                        document.getElementById("message").textContent =
+                            JSON.stringify(result.detail ?? result);
+
+                        return;
+                    }
+
+                    // Display successful API response
+                    document.getElementById("status").textContent =
+                        "Success: HTTP " + response.status;
+
+                    document.getElementById("encounter-id").textContent =
+                        result.encounter_id ?? "Not returned by API";
+
+                    document.getElementById("risk-score").textContent =
+                        result.risk_score ?? "Not returned";
+
+                    document.getElementById("risk-level").textContent =
+                        result.risk_level ?? "Not returned";
+
+                    document.getElementById("message").textContent =
+                        result.encounter_id != null
+                            ? "The API returned an encounter ID. Verify database persistence if needed."
+                            : "Request succeeded, but the API did not return an encounter ID.";
+
+                } catch (error) {
+
+                    document.getElementById("status").textContent =
+                        "Request failed";
+
+                    document.getElementById("encounter-id").textContent =
+                        "Not confirmed";
+
+                    document.getElementById("message").textContent =
+                        "Could not connect to FastAPI. Check the server and CORS settings.";
+
+                    document.getElementById("response-data").textContent =
+                        error.message;
+
+                    console.error("API error:", error);
+
+                } finally {
+
+                    button.disabled = false;
+
+                }
+
+            });
+    </script>
+
+</body>
+</html>

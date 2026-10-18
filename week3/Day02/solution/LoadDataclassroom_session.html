@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetes Patient Management</title>
+
+    <style>
+        /* Basic page design */
+        body {
+            margin: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+
+        /* Main heading */
+        h1 {
+            color: blueviolet;
+            text-align: center;
+        }
+
+        h2 {
+            color: #444;
+            border-bottom: 2px solid blueviolet;
+            padding-bottom: 8px;
+        }
+
+        /* Sections */
+        section {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px #ddd;
+        }
+
+        /* Form layout */
+        form {
+            max-width: 600px;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: inline-block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        /* Input fields and dropdowns */
+        input, select {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: blueviolet;
+        }
+
+        /* Buttons */
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: chocolate;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        button:hover {
+            background-color: #a94e13;
+        }
+
+        /* Patient table */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background-color: white;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: blueviolet;
+            color: white;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tbody tr:hover {
+            background-color: #e9e0f5;
+        }
+
+        /* Delete button */
+        .delete-button {
+            background-color: #dc3545;
+            margin: 0;
+            padding: 6px 10px;
+        }
+
+        .delete-button:hover {
+            background-color: #b02a37;
+        }
+
+        /* Small screen design */
+        @media (max-width: 600px) {
+            body {
+                margin: 10px;
+            }
+
+            section {
+                padding: 12px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            th, td {
+                padding: 7px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Diabetes Patient Management</h1>
+    </header>
+
+    <main>
+
+        <section>
+            <h2>Add Patient Encounter</h2>
+
+            <form id="encounter-form">
+                <label for="patient-number">Patient Number:</label>
+                <input type="text" id="patient-number" required>
+
+                <label for="age">Age:</label>
+                <select id="age">
+                    <option value="0-18">(0-18)</option>
+                    <option value="19-25">(19-25)</option>
+                    <option value="26-34">(26-34)</option>
+                    <option value="35-60">(35-60)</option>
+                    <option value="60+">(60+)</option>
+                </select>
+
+                <button type="submit">Add Encounter</button>
+            </form>
+        </section>
+
+        <section>
+            <h2>Patient Records</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Patient Number</th>
+                        <th>Age</th>
+                        <th>Risk Score</th>
+                        <th>Risk Level</th>
+                    </tr>
+                </thead>
+
+                <!-- <tbody>
+                    <tr id="encounter-row">
+                        <td id="patient-nbr">Loading...</td>
+                        <td id="patient-age"></td>
+                        <td id="risk-score"></td>
+                        <td id="risk-level"></td>
+                    </tr>
+                </tbody> -->
+                <tbody id="encounters-table-body">
+                    <tr>
+                        <td colspan="4">Loading patient records...</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p id="message"></p>
+        </section>
+
+    </main>
+
+    <!-- <script>
+        // Call API when the HTML page loads
+        document.addEventListener("DOMContentLoaded", function () {
+
+            fetch("http://localhost:8000/encounters")
+                .then(response => response.json())
+                .then(data => {
+
+                    // Get the first encounter from the API response
+                    const encounter = data[0];
+
+                    if (!encounter) {
+                        document.getElementById("patient-nbr").textContent =
+                            "No records found";
+                        return;
+                    }
+
+                    // Display API values in the table
+                    document.getElementById("patient-nbr").textContent =
+                        encounter.patient_nbr;
+
+                    document.getElementById("patient-age").textContent =
+                        encounter.age;
+
+                    document.getElementById("risk-score").textContent =
+                        encounter.risk_score;
+
+                    document.getElementById("risk-level").textContent =
+                        encounter.risk_level;
+
+                })
+                .catch(error => {
+                    document.getElementById("patient-nbr").textContent =
+                        "Unable to load";
+
+                    document.getElementById("message").textContent =
+                        "Please check whether the FastAPI server is running.";
+
+                    console.error(error);
+                });
+
+        });
+    </script> -->
+    <script>
+        // Call API when the HTML page loads
+        document.addEventListener("DOMContentLoaded", function () {
+
+            fetch("http://localhost:8000/encounters")
+                .then(response => response.json())
+                .then(data => {
+
+                    // Get the table body
+                    const tableBody =
+                        document.getElementById("encounters-table-body");
+
+                    // Clear the loading message
+                    tableBody.innerHTML = "";
+
+                    // Check whether records exist
+                    if (data.length === 0) {
+                        tableBody.innerHTML =
+                            "<tr><td colspan='4'>No records found</td></tr>";
+                        return;
+                    }
+
+                    // Display all patient records
+                    data.forEach(encounter => {
+
+                        const row = document.createElement("tr");
+
+                        row.innerHTML = `
+                        <td>${encounter.patient_nbr}</td>
+                        <td>${encounter.age}</td>
+                        <td>${encounter.risk_score}</td>
+                        <td>${encounter.risk_level}</td>
+                    `;
+
+                        tableBody.appendChild(row);
+
+                    });
+
+                })
+                .catch(error => {
+                    document.getElementById("encounters-table-body").innerHTML =
+                        "<tr><td colspan='4'>Unable to load records</td></tr>";
+
+                    console.error("API Error:", error);
+                });
+
+        });
+    </script>
+</body>
+
+</html>

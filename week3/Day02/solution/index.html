@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetes Patient Management Workspace</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: #26352f;
+            background: #f3f7f5;
+        }
+        header {
+            padding: 18px 24px;
+            color: #fff;
+            background: #28684f;
+        }
+        header h1 { margin: 0 0 8px; }
+        header p { margin: 0; }
+        nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 12px 24px;
+            background: #e5efe9;
+        }
+        nav button {
+            padding: 10px 16px;
+            border: 1px solid #398466;
+            border-radius: 6px;
+            color: #28684f;
+            background: #fff;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        nav button[aria-selected="true"] {
+            color: #fff;
+            background: #398466;
+        }
+        iframe {
+            display: block;
+            width: 100%;
+            height: calc(100vh - 146px);
+            min-height: 650px;
+            border: 0;
+            background: #f3f7f5;
+        }
+        @media (max-width: 600px) {
+            header, nav { padding-left: 14px; padding-right: 14px; }
+            iframe { height: calc(100vh - 170px); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Diabetes Patient Management</h1>
+        <p>Create, search, review high-care intervention status, and update patient encounters.</p>
+    </header>
+    <nav aria-label="Workspace screens">
+        <button type="button" data-page="SearchEncounters.html" aria-selected="true">Search &amp; High-Care Queue</button>
+        <button type="button" data-page="UpdateEncounter.html" aria-selected="false">Update Encounter</button>
+        <button type="button" data-page="InsertEncounterClsSess.html" aria-selected="false">Insert Encounter</button>
+    </nav>
+    <iframe id="workspace-frame" title="Patient management workspace" src="SearchEncounters.html"></iframe>
+    <script>
+        const frame = document.getElementById("workspace-frame");
+        const tabs = document.querySelectorAll("nav button[data-page]");
+        tabs.forEach((tab) => {
+            tab.addEventListener("click", () => {
+                tabs.forEach((item) => item.setAttribute("aria-selected", "false"));
+                tab.setAttribute("aria-selected", "true");
+                frame.src = tab.dataset.page;
+            });
+        });
+    </script>
+</body>
+</html>

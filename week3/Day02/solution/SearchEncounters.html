@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Patients and High-Care Queue</title>
+    <style>
+        :root {
+            color-scheme: light;
+            font-family: Arial, sans-serif;
+            color: #26352f;
+            background: #f3f7f5;
+        }
+
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 24px; }
+        h1, h2 { color: #28684f; }
+        h1 { margin-top: 0; }
+        section {
+            margin: 18px 0;
+            padding: 20px;
+            border: 1px solid #d8e4dd;
+            border-radius: 10px;
+            background: #fff;
+        }
+        .tabs, .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+        .tabs { margin: 18px 0; }
+        button, .link-button {
+            padding: 10px 15px;
+            border: 0;
+            border-radius: 6px;
+            color: #fff;
+            background: #398466;
+            font: inherit;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        button:hover, .link-button:hover { background: #28664d; }
+        button[aria-selected="true"] { background: #194c39; }
+        button:disabled { opacity: .6; cursor: wait; }
+        form {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(140px, 1fr));
+            gap: 14px;
+            align-items: end;
+        }
+        label { display: block; margin-bottom: 6px; font-weight: 700; }
+        input, select {
+            width: 100%;
+            min-height: 40px;
+            padding: 8px;
+            border: 1px solid #bdccc3;
+            border-radius: 5px;
+            background: #fff;
+            font: inherit;
+        }
+        .form-actions { display: flex; gap: 8px; }
+        .notice { min-height: 1.4em; margin: 12px 0 0; }
+        .error { color: #a52a2a; }
+        .success { color: #246843; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #e1e9e4;
+            text-align: left;
+            white-space: nowrap;
+        }
+        th { background: #edf5f0; }
+        a { color: #176b4a; font-weight: 700; }
+        .risk-high { color: #a52a2a; font-weight: 700; }
+        .hidden { display: none; }
+        @media (max-width: 760px) {
+            body { padding: 14px; }
+            form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 480px) {
+            form { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Patient Search</h1>
+        <p>Search encounters by ID or risk, or review the high-care queue and current intervention status.</p>
+        <a class="link-button" href="index.html">Workspace home</a>
+    </header>
+
+    <nav class="tabs" aria-label="Patient views">
+        <button type="button" id="search-tab" aria-selected="true">Search Patients</button>
+        <button type="button" id="high-care-tab" aria-selected="false">High-Care Patients</button>
+    </nav>
+
+    <main>
+        <section id="search-panel">
+            <h2>Search Encounters</h2>
+            <form id="search-form">
+                <div>
+                    <label for="encounter-id">Encounter ID</label>
+                    <input id="encounter-id" type="number" min="1" step="1">
+                </div>
+                <div>
+                    <label for="patient-nbr">Patient Number</label>
+                    <input id="patient-nbr" type="number" min="1" step="1">
+                </div>
+                <div>
+                    <label for="risk-score">Risk Score</label>
+                    <input id="risk-score" type="number" min="0" max="8" step="1">
+                </div>
+                <div>
+                    <label for="risk-level">Risk Level</label>
+                    <select id="risk-level">
+                        <option value="">Any risk level</option>
+                        <option value="LOW">LOW</option>
+                        <option value="MEDIUM">MEDIUM</option>
+                        <option value="HIGH">HIGH</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" id="search-button">Search</button>
+                    <button type="reset" id="clear-search">Clear</button>
+                </div>
+            </form>
+            <p id="search-message" class="notice" role="status"></p>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Encounter ID</th>
+                            <th>Patient Number</th>
+                            <th>Age</th>
+                            <th>Risk Score</th>
+                            <th>Risk Level</th>
+                            <th>Days in Hospital</th>
+                            <th>Readmitted</th>
+                        </tr>
+                    </thead>
+                    <tbody id="search-results">
+                        <tr><td colspan="7">Search results will appear here.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="high-care-panel" class="hidden">
+            <div class="actions">
+                <h2 style="margin: 0 auto 0 0;">High-Care Patients</h2>
+                <button type="button" id="load-high-care">Load / Refresh Queue</button>
+            </div>
+            <p id="high-care-message" class="notice" role="status">Load the queue to see high-risk encounters.</p>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Encounter ID</th>
+                            <th>Patient Number</th>
+                            <th>Risk Score</th>
+                            <th>Risk Level</th>
+                            <th>Intervention Status</th>
+                            <th>Assigned To</th>
+                            <th>Notes</th>
+                            <th>Last Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody id="high-care-results">
+                        <tr><td colspan="8">High-care queue has not been loaded.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const API_BASE = "http://localhost:8000";
+        const searchForm = document.getElementById("search-form");
+
+        function showMessage(element, message, isError = false) {
+            element.textContent = message;
+            element.className = `notice ${isError ? "error" : "success"}`;
+        }
+
+        async function readResponse(response) {
+            const text = await response.text();
+            if (!text) return null;
+            try {
+                return JSON.parse(text);
+            } catch {
+                return { detail: text };
+            }
+        }
+
+        function addCell(row, value) {
+            const cell = document.createElement("td");
+            cell.textContent = value == null || value === "" ? "—" : String(value);
+            row.appendChild(cell);
+            return cell;
+        }
+
+        function renderEncounters(items) {
+            const body = document.getElementById("search-results");
+            body.replaceChildren();
+            if (!items.length) {
+                const row = body.insertRow();
+                const cell = row.insertCell();
+                cell.colSpan = 7;
+                cell.textContent = "No matching encounters.";
+                return;
+            }
+
+            for (const encounter of items) {
+                const row = body.insertRow();
+                const idCell = row.insertCell();
+                const link = document.createElement("a");
+                link.href = `UpdateEncounter.html?encounter_id=${encodeURIComponent(encounter.encounter_id)}`;
+                link.textContent = String(encounter.encounter_id);
+                idCell.appendChild(link);
+                addCell(row, encounter.patient_nbr);
+                addCell(row, encounter.age);
+                addCell(row, encounter.risk_score);
+                const riskCell = addCell(row, encounter.risk_level);
+                if (encounter.risk_level === "HIGH") riskCell.className = "risk-high";
+                addCell(row, encounter.time_in_hospital);
+                addCell(row, encounter.readmitted);
+            }
+        }
+
+        searchForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const button = document.getElementById("search-button");
+            const params = new URLSearchParams();
+            for (const [fieldId, parameter] of [
+                ["encounter-id", "encounter_id"],
+                ["patient-nbr", "patient_nbr"],
+                ["risk-score", "risk_score"],
+                ["risk-level", "risk_level"]
+            ]) {
+                const value = document.getElementById(fieldId).value.trim();
+                if (value) params.set(parameter, value);
+            }
+
+            const message = document.getElementById("search-message");
+            if (!params.size) {
+                showMessage(message, "Enter at least one search filter.", true);
+                return;
+            }
+
+            button.disabled = true;
+            showMessage(message, "Searching...");
+            try {
+                const response = await fetch(`${API_BASE}/encounters/search?${params}`);
+                const result = await readResponse(response);
+                if (!response.ok) {
+                    renderEncounters([]);
+                    showMessage(message, `Search failed (HTTP ${response.status}): ${result?.detail ?? "Request failed"}`, true);
+                    return;
+                }
+                renderEncounters(Array.isArray(result) ? result : []);
+                showMessage(message, `${result.length} encounter(s) found. HTTP ${response.status}.`);
+            } catch (error) {
+                showMessage(message, `Unable to reach the API: ${error.message}`, true);
+            } finally {
+                button.disabled = false;
+            }
+        });
+
+        searchForm.addEventListener("reset", () => {
+            window.setTimeout(() => {
+                renderEncounters([]);
+                showMessage(document.getElementById("search-message"), "Search filters cleared.");
+            }, 0);
+        });
+
+        const searchTab = document.getElementById("search-tab");
+        const highCareTab = document.getElementById("high-care-tab");
+        const searchPanel = document.getElementById("search-panel");
+        const highCarePanel = document.getElementById("high-care-panel");
+
+        function selectView(view) {
+            const isSearch = view === "search";
+            searchTab.setAttribute("aria-selected", String(isSearch));
+            highCareTab.setAttribute("aria-selected", String(!isSearch));
+            searchPanel.classList.toggle("hidden", !isSearch);
+            highCarePanel.classList.toggle("hidden", isSearch);
+        }
+
+        searchTab.addEventListener("click", () => selectView("search"));
+        highCareTab.addEventListener("click", () => selectView("high-care"));
+
+        document.getElementById("load-high-care").addEventListener("click", async () => {
+            const button = document.getElementById("load-high-care");
+            const message = document.getElementById("high-care-message");
+            const body = document.getElementById("high-care-results");
+            button.disabled = true;
+            showMessage(message, "Loading high-care queue...");
+            try {
+                const response = await fetch(`${API_BASE}/care-queue/high?limit=100&offset=0`);
+                const result = await readResponse(response);
+                if (!response.ok) {
+                    showMessage(message, `Queue load failed (HTTP ${response.status}): ${result?.detail ?? "Request failed"}`, true);
+                    return;
+                }
+
+                body.replaceChildren();
+                if (!Array.isArray(result) || result.length === 0) {
+                    const row = body.insertRow();
+                    const cell = row.insertCell();
+                    cell.colSpan = 8;
+                    cell.textContent = "No high-care encounters found.";
+                    showMessage(message, `No high-care patients found. HTTP ${response.status}.`);
+                    return;
+                }
+
+                for (const encounter of result) {
+                    const row = body.insertRow();
+                    const idCell = row.insertCell();
+                    const link = document.createElement("a");
+                    link.href = `UpdateEncounter.html?encounter_id=${encodeURIComponent(encounter.encounter_id)}`;
+                    link.textContent = String(encounter.encounter_id);
+                    idCell.appendChild(link);
+                    addCell(row, encounter.patient_nbr);
+                    addCell(row, encounter.risk_score);
+                    const riskCell = addCell(row, encounter.risk_level);
+                    riskCell.className = "risk-high";
+                    addCell(row, encounter.status);
+                    addCell(row, encounter.assigned_to);
+                    addCell(row, encounter.notes);
+                    addCell(row, encounter.updated_at);
+                }
+                showMessage(message, `${result.length} high-care encounter(s) loaded. Intervention status is from the queue response (HTTP ${response.status}).`);
+            } catch (error) {
+                showMessage(message, `Unable to reach the API: ${error.message}`, true);
+            } finally {
+                button.disabled = false;
+            }
+        });
+
+        if (new URLSearchParams(window.location.search).get("view") === "high-care") {
+            selectView("high-care");
+            document.getElementById("load-high-care").click();
+        }
+    </script>
+</body>
+</html>

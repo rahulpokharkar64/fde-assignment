@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetes Patient Management</title>
+
+    <style>
+        /* Basic page design */
+        body {
+            margin: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+
+        /* Main heading */
+        h1 {
+            color: blueviolet;
+            text-align: center;
+        }
+
+        h2 {
+            color: #444;
+            border-bottom: 2px solid blueviolet;
+            padding-bottom: 8px;
+        }
+
+        /* Sections */
+        section {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px #ddd;
+        }
+
+        /* Form layout */
+        form {
+            max-width: 600px;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: inline-block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        /* Input fields and dropdowns */
+        input, select {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: blueviolet;
+        }
+
+        /* Buttons */
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: chocolate;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        button:hover {
+            background-color: #a94e13;
+        }
+
+        /* Patient table */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background-color: white;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: blueviolet;
+            color: white;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tbody tr:hover {
+            background-color: #e9e0f5;
+        }
+
+        /* Delete button */
+        .delete-button {
+            background-color: #dc3545;
+            margin: 0;
+            padding: 6px 10px;
+        }
+
+        .delete-button:hover {
+            background-color: #b02a37;
+        }
+
+        /* Small screen design */
+        @media (max-width: 600px) {
+            body {
+                margin: 10px;
+            }
+
+            section {
+                padding: 12px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            th, td {
+                padding: 7px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Diabetes Patient Management</h1>
+    </header>
+
+    <main>
+
+        <!-- Section 1: Add Patient -->
+        <section aria-labelledby="add-patient-encounter">
+            <h2 id="add-patient-encounter">Add Patient Encounter</h2>
+
+            <form id="patient-form">
+
+                <p>
+                    <label for="patient-number">Patient Number</label><br>
+                    <input type="text" id="patient-number"
+                        name="patient-number" required>
+                </p>
+
+                <p>
+                    <label for="age-group">Age Group</label><br>
+                    <select id="age-group" name="age-group" required>
+                        <option value="">Select age group</option>
+                        <option value="0-18">0-18</option>
+                        <option value="19-25">19-25</option>
+                        <option value="26-34">26-34</option>
+                        <option value="35-60">35-60</option>
+                        <option value="60+">60+</option>
+                    </select>
+                </p>
+
+                <p>
+                    <label for="time-in-hospital">
+                        Time in Hospital (days)
+                    </label><br>
+                    <input type="number" id="time-in-hospital"
+                        min="0" required>
+                </p>
+
+                <p>
+                    <label for="inpatient-visits">Inpatient Visits</label><br>
+                    <input type="number" id="inpatient-visits"
+                        min="0" required>
+                </p>
+
+                <p>
+                    <label for="emergency-visits">Emergency Visits</label><br>
+                    <input type="number" id="emergency-visits"
+                        min="0" required>
+                </p>
+
+                <p>
+                    <label for="medications">Medications</label><br>
+                    <input type="text" id="medications"
+                        placeholder="Enter medication names" required>
+                </p>
+
+                <button type="submit">Add Patient</button>
+                <button type="reset">Clear Form</button>
+
+            </form>
+        </section>
+
+        <!-- Section 2: Patient Records -->
+        <section aria-labelledby="patient-records">
+            <h2 id="patient-records">Patient Records</h2>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Patient Number</th>
+                            <th>Age Group</th>
+                            <th>Hospital Days</th>
+                            <th>Inpatient Visits</th>
+                            <th>Emergency Visits</th>
+                            <th>Medications</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="patient-table">
+                        <tr>
+                            <td colspan="7">No patient records available.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Get the form and table
+        const form = document.getElementById("patient-form");
+        const table = document.getElementById("patient-table");
+
+        // Add a patient when the form is submitted
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            // Get values from the form
+            const patientNumber =
+                document.getElementById("patient-number").value.trim();
+
+            const ageGroup =
+                document.getElementById("age-group").value;
+
+            const hospitalDays =
+                document.getElementById("time-in-hospital").value;
+
+            const inpatientVisits =
+                document.getElementById("inpatient-visits").value;
+
+            const emergencyVisits =
+                document.getElementById("emergency-visits").value;
+
+            const medications =
+                document.getElementById("medications").value.trim();
+
+            // Check for duplicate patient numbers
+            const existingPatients = table.querySelectorAll("tr");
+
+            for (const row of existingPatients) {
+                if (row.cells.length > 1 &&
+                    row.cells[0].textContent === patientNumber) {
+                    alert("This patient number already exists.");
+                    return;
+                }
+            }
+
+            // Remove the empty table message
+            if (table.textContent.includes("No patient records available.")) {
+                table.innerHTML = "";
+            }
+
+            // Create a new table row
+            const row = document.createElement("tr");
+
+            const values = [
+                patientNumber,
+                ageGroup,
+                hospitalDays,
+                inpatientVisits,
+                emergencyVisits,
+                medications
+            ];
+
+            // Add patient information safely
+            values.forEach(function(value) {
+                const cell = document.createElement("td");
+                cell.textContent = value;
+                row.appendChild(cell);
+            });
+
+            // Add a delete button
+            const actionCell = document.createElement("td");
+            const deleteButton = document.createElement("button");
+
+            deleteButton.textContent = "Delete";
+            deleteButton.type = "button";
+            deleteButton.className = "delete-button";
+
+            deleteButton.addEventListener("click", function() {
+                row.remove();
+
+                if (table.rows.length === 0) {
+                    table.innerHTML =
+                        '<tr><td colspan="7">' +
+                        'No patient records available.</td></tr>';
+                }
+            });
+
+            actionCell.appendChild(deleteButton);
+            row.appendChild(actionCell);
+
+            table.appendChild(row);
+
+            // Clear the form after adding the patient
+            form.reset();
+        });
+    </script>
+
+</body>
+</html>
